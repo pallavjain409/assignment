@@ -4,19 +4,19 @@ class Product {
   constructor(API_URL) {
     this.BASE_URL = `${API_URL}/products`;
   }
-  getAllProducts = ({pageNo , limit}) => {
+  getAllProducts = ({pageNo , limit, search}) => {
     let data;
-    console.log("s",pageNo)
+    const params  = {_page : pageNo || 1, _limit : limit}
+    if(search.length){
+      params["id"] = search
+    }
     return axios
       .get(this.BASE_URL, {
-          params : {
-              _page :pageNo || 1,
-              _limit :  5
-          }
+          params 
       })
       .then((response) => {
         data = response.data;
-        return this.getAllProductsDataLength();
+        return this.getAllProductsDataLength(search);
       })
       .then((response) => {
         return {
@@ -29,9 +29,13 @@ class Product {
       });
   };
 
-  getAllProductsDataLength = () => {
+  getAllProductsDataLength = (search) => {
+    const params = {};
+    if(search.length){
+      params["id"] = search
+    }
     return axios
-      .get(this.BASE_URL)
+      .get(this.BASE_URL, {params})
       .then((response) => {
         return response.data.length;
       })

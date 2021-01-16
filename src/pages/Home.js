@@ -1,6 +1,7 @@
 import React, { Fragment } from "react";
 import { apiService } from "../api";
-import { Products, Loading, Pagination } from "../components";
+import { Products, Loading, Pagination, SearchBar } from "../components";
+import { debounce } from "lodash";
 
 class Home extends React.Component {
   constructor(props) {
@@ -9,30 +10,34 @@ class Home extends React.Component {
       page: 1,
       loading: false,
       products: null,
-      count: null,
+      count: 0,
       limit: 5,
+      search: "",
     };
     this.apiService = apiService;
   }
   handlePageClick = (pageNo) => {
-    this.setState({
-        page : pageNo
-    }, () => {
+    this.setState(
+      {
+        page: pageNo,
+      },
+      () => {
         this.getProductsData();
-    })
-  }
+      }
+    );
+  };
   componentDidMount() {
     this.setState({
       loading: true,
     });
     this.getProductsData();
-    
   }
 
-  getProductsData(){
+  getProductsData() {
     apiService.Product.getAllProducts({
-        pageNo : this.state.page,
-        limit : this.state.limit
+      pageNo: this.state.page,
+      limit: this.state.limit,
+      search: this.state.search,
     })
       .then((response) => {
         this.setState({
@@ -48,6 +53,18 @@ class Home extends React.Component {
         });
       });
   }
+
+  handleSearchChange = (value) => {
+    this.setState(
+      {
+        search: value,
+        page: 1,
+      },
+      () => {
+        this.getProductsData();
+      }
+    );
+  };
   render() {
     const { loading, products } = this.state;
     return (
@@ -56,8 +73,20 @@ class Home extends React.Component {
           <Loading />
         ) : (
           <Fragment>
-            <Products products={products} />
-            <Pagination dataSize={this.state.count} limit={this.state.limit} onPageClick = {this.handlePageClick} currentPage = {this.state.page} />
+            <SearchBar handleChange={this.handleSearchChange} />
+            {this.state.count ? (
+              <Fragment>
+                <Products products={products} />
+                <Pagination
+                  dataSize={this.state.count}
+                  limit={this.state.limit}
+                  onPageClick={this.handlePageClick}
+                  currentPage={this.state.page}
+                />
+              </Fragment>
+            ) : (
+              <p>No Result found</p>
+            )}
           </Fragment>
         )}
       </div>
