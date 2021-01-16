@@ -1,5 +1,5 @@
 import Home from './pages/Home';
-import Navbar from './components/Navbar';
+import { Navbar } from './components';
 import { Fragment } from 'react';
 
 function App() {
